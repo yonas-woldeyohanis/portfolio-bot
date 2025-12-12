@@ -1,0 +1,13 @@
+# Ignore the virtual environment folder
+venv/
+env/
+
+# Ignore compiled python files (junk)
+__pycache__/
+*.pyc
+
+# Ignore environment variables (SECURITY RISK)
+.env
+
+# If your config.py has real passwords inside, uncomment the next line:
+# config.py
