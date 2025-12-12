@@ -1,10 +1,12 @@
 # config.py
+import os
+from dotenv import load_dotenv
 
-# --- Telegram Bot Token ---
-# Get this from BotFather on Telegram
-BOT_TOKEN = "8349128089:AAEgyyQw3-kFfFUGTi4295B-SEVU3M-Br2c"
+load_dotenv()
 
-# --- Admin Telegram User ID ---
-# This is your personal Telegram User ID.
-# The bot will send quote requests and notifications here.
-ADMIN_USER_ID = 5873042615# Replace with your actual numeric Telegram ID
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+ADMIN_USER_ID = os.getenv("ADMIN_USER_ID")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") # <--- ADD THIS
+
+
+

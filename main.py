@@ -1,6 +1,7 @@
 # main.py
 
 import logging
+from ai_service import ask_gemini  # <--- NEW
 from keep_alive import start_server
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
@@ -52,16 +53,20 @@ async def language_choice_handler(update: Update, context: ContextTypes.DEFAULT_
     await send_main_menu(update, context, user_id)
 
 
-# --- THIS IS THE HANDLER FOR ALL NON-CONVERSATION BUTTONS ---
+
 async def main_menu_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handles messages from the main menu buttons that are NOT the start of a conversation."""
+    """
+    Handles text messages. 
+    1. Checks if it matches a Menu Button.
+    2. If NOT a button, sends the text to Gemini AI.
+    """
     from portfolio import show_portfolio
 
     user_id = update.message.from_user.id
     received_text = update.message.text
     lang = user_language.get(user_id, 'en')
 
-    # A dictionary mapping button text to functions
+    # Map buttons to functions
     button_map = {
         TEXTS[lang]['portfolio_btn']: show_portfolio,
         TEXTS[lang]['services_btn']: show_services,
@@ -70,13 +75,20 @@ async def main_menu_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         TEXTS[lang]['inspire_btn']: start_idea_generator,
     }
 
-    # If the received text is a known button, call its function
+    # CASE A: User clicked a Button
     if received_text in button_map:
         await button_map[received_text](update, context)
+        
+    # CASE B: User typed random text -> ASK AI
     else:
-        # Optional: Handle other text messages when not in a conversation
-        await update.message.reply_text("Please use one of the buttons below.")
-
+        # Show "Typing..." animation
+        await context.bot.send_chat_action(chat_id=user_id, action="typing")
+        
+        # Get response from the AI Brain
+        ai_response = await ask_gemini(received_text)
+        
+        # Reply to user
+        await update.message.reply_text(ai_response, parse_mode='Markdown')
 # Placeholder functions for simple menu options
 async def show_services(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_id = update.message.from_user.id

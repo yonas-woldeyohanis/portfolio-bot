@@ -1,70 +1,25 @@
 # idea_generator.py
-
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update
 from telegram.ext import ContextTypes
-from utils import get_text, user_language
 
 async def start_idea_generator(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Displays the main industry selection menu for the idea generator."""
-    user_id = update.message.from_user.id
-    lang = user_language.get(user_id, 'en')
+    """Invites the user to use the AI Brain."""
     
-    generator_data = get_text('idea_generator', user_id)
-    industries = generator_data['industries']
+    text = (
+        "💡 **AI Idea Generator & Chat**\n\n"
+        "I have upgraded my brain! 🧠\n\n"
+        "Instead of choosing from a list, **just type what you need right here.**\n\n"
+        "Examples:\n"
+        "• _'Give me bot ideas for a Pharmacy'_\n"
+        "• _'How much for a shopping bot?'_\n"
+        "• _'Write a proposal for a delivery system'_\n\n"
+        "**Go ahead, type your question now! 👇**"
+    )
     
-    keyboard = []
-    for industry_key, industry_data in industries.items():
-        button = InlineKeyboardButton(
-            industry_data['button_text'],
-            callback_data=f"idea_industry_{industry_key}_{lang}"
-        )
-        keyboard.append([button])
-        
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text(generator_data['title'], reply_markup=reply_markup)
+    # We don't need buttons/handlers anymore because main.py will catch the text
+    await update.message.reply_text(text, parse_mode='Markdown')
 
-
-async def industry_choice_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handles the user's choice of industry and displays creative ideas."""
-    query = update.callback_query
-    await query.answer()
-    
-    # Data is 'idea_industry_INDUSTRYKEY_LANGUAGE'
-    _, _, industry_key, lang = query.data.split('_')
-    
-    industry_data = get_text(f'idea_generator.industries.{industry_key}', query.from_user.id)
-    
-    # Format the ideas into a clean message
-    message = f"*{industry_data['ideas_title']}*\n\n"
-    for idea in industry_data['ideas']:
-        message += f"✅ {idea}\n\n"
-        
-    back_button_text = get_text('idea_generator.back_button', query.from_user.id)
-    
-    keyboard = [[InlineKeyboardButton(back_button_text, callback_data=f"back_to_ideas_{lang}")]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    await query.edit_message_text(text=message, parse_mode='Markdown', reply_markup=reply_markup)
-
-
-async def back_to_industries_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handles the 'Back to Industries' button click."""
-    query = update.callback_query
-    await query.answer()
-    
-    user_id = query.from_user.id
-    lang = user_language.get(user_id, 'en')
-    
-    generator_data = get_text('idea_generator', user_id)
-    industries = generator_data['industries']
-    
-    keyboard = []
-    for industry_key, industry_data in industries.items():
-        button = InlineKeyboardButton(
-            industry_data['button_text'],
-            callback_data=f"idea_industry_{industry_key}_{lang}"
-        )
-        keyboard.append([button])
-        
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await query.edit_message_text(text=generator_data['title'], reply_markup=reply_markup)
+# We can remove industry_choice_handler and back_to_industries_handler 
+# because we don't need them anymore!
+async def industry_choice_handler(update, context): pass
+async def back_to_industries_handler(update, context): pass
